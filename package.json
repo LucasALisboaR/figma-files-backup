@@ -8,11 +8,12 @@
     "node": ">=20"
   },
   "scripts": {
-    "start": "node index.js",
-    "map": "node index.js --map-only",
-    "download": "node index.js --from-manifest",
-    "retry": "node index.js --from-manifest --status failed",
-    "resume": "node index.js --from-manifest --status pending"
+    "start": "node src/index.js",
+    "map": "node src/index.js --map-only",
+    "download": "node src/index.js --from-manifest",
+    "retry": "node src/index.js --from-manifest --status failed",
+    "resume": "node src/index.js --from-manifest --status pending",
+    "test": "node --test src/tests"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

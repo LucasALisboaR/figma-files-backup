@@ -1,8 +1,6 @@
-import path from 'path'
-import os from 'os'
-
 // Caracteres inválidos para nomes de arquivo/diretório no Windows
 const WINDOWS_INVALID_CHARS = /[\\/:*?"<>|]/g
+const WINDOWS_RESERVED_NAMES = /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(?:\..*)?$/i
 const MAX_NAME_LENGTH = 100
 
 /**
@@ -12,12 +10,17 @@ const MAX_NAME_LENGTH = 100
  * @returns {string}
  */
 export function sanitizeName(name) {
-  return name
+  const sanitized = String(name ?? '')
     .replace(WINDOWS_INVALID_CHARS, '_')
     .replace(/\s+/g, ' ')
     .trim()
     .slice(0, MAX_NAME_LENGTH)
-    || 'sem-nome'
+
+  if (!sanitized || sanitized === '.' || sanitized === '..' || WINDOWS_RESERVED_NAMES.test(sanitized)) {
+    return 'sem-nome'
+  }
+
+  return sanitized
 }
 
 /**

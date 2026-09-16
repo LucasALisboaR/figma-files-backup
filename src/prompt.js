@@ -13,7 +13,7 @@ import readline from 'readline'
  * @param {number} max  — número máximo válido
  * @returns {Set<number>|null}
  */
-function parseNumbers(input, max) {
+export function parseNumbers(input, max) {
   const indices = new Set()
 
   for (const part of input.split(',')) {

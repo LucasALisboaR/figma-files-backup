@@ -45,8 +45,8 @@ async function detectCaptcha(page) {
   return null
 }
 
-// Pasta de screenshots — relativa ao diretório do script
-const SCREENSHOTS_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'screenshots')
+// Pasta de screenshots na raiz do projeto, fora do código-fonte.
+const SCREENSHOTS_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', 'screenshots')
 
 // Contador global de screenshots por arquivo (reset a cada downloadFile)
 let screenshotCounter = 1

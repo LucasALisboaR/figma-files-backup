@@ -7,10 +7,10 @@ import fs from 'fs'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-// Carrega o .env local do próprio diretório (não polui o .env.example da raiz)
-const envPath = path.resolve(__dirname, '.env')
+// Carrega o .env da raiz do projeto, sem alterar o .env.example.
+const envPath = path.resolve(__dirname, '..', '.env')
 if (!fs.existsSync(envPath)) {
-  const examplePath = path.resolve(__dirname, '.env.example')
+  const examplePath = path.resolve(__dirname, '..', '.env.example')
   throw new Error(
     `Arquivo .env não encontrado em ${envPath}\n` +
     `Copie ${examplePath} para ${envPath} e preencha as variáveis.`
@@ -21,8 +21,8 @@ if (!fs.existsSync(envPath)) {
 const { default: dotenv } = await import('dotenv')
 dotenv.config({ path: envPath })
 
-// A raiz do repo é o diretório deste script.
-const REPO_ROOT = __dirname
+// A raiz do repo fica um nível acima dos módulos da aplicação.
+const REPO_ROOT = path.resolve(__dirname, '..')
 
 function require_env(name) {
   const val = process.env[name]

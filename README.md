@@ -22,6 +22,12 @@ npm install
 npx playwright install chromium
 ```
 
+Para executar os testes unitários:
+
+```bash
+npm test
+```
+
 ### 3. Configurar variáveis de ambiente
 
 Copie o arquivo de exemplo e preencha:
@@ -79,7 +85,7 @@ Se o Figma baixado e configurado para abrir links no app desktop, o browser ser�
 ### Execução completa (Etapa 1 + Etapa 2)
 
 ```bash
-node index.js
+node src/index.js
 ```
 
 ### Apenas mapeamento (sem abrir browser)
@@ -87,7 +93,7 @@ node index.js
 Útil para validar o token e ver quantos arquivos serão baixados antes de iniciar:
 
 ```bash
-node index.js --map-only
+node src/index.js --map-only
 ```
 
 ### Retomar downloads interrompidos
@@ -95,7 +101,7 @@ node index.js --map-only
 O manifest registra o status de cada arquivo. Por padrão, entradas com status `pending` (os que faltam) ou `failed` (os que falharam) voltam para a fila automaticamente:
 
 ```bash
-npm run download        # = node index.js --from-manifest
+npm run download        # = node src/index.js --from-manifest
 ```
 
 No início da execução o script imprime a contagem por status no manifest e a composição da fila, para você saber exatamente o que vai ser processado.
@@ -105,8 +111,8 @@ Para escolher o que reenfileirar, use `--status`:
 ```bash
 npm run retry                                  # só os que falharam
 npm run resume                                 # só os que nunca foram tentados
-node index.js --from-manifest --status restricted        # revalida os restritos
-node index.js --from-manifest --status failed --limit 5  # testa 5 antes de soltar tudo
+node src/index.js --from-manifest --status restricted        # revalida os restritos
+node src/index.js --from-manifest --status failed --limit 5  # testa 5 antes de soltar tudo
 ```
 
 Ao contrário do `--force`, o `--status` não reenfileira os arquivos já baixados.
@@ -122,19 +128,19 @@ Ao contrário do `--force`, o `--status` não reenfileira os arquivos já baixad
 | `--headed` | Exibe o browser na tela (útil para debug) |
 | `--project <nome\|id>` | Filtra por projeto (repetível) |
 | `--limit <n>` | Baixa no máximo N arquivos nesta execução |
-| `--out <dir>` | Diretório de saída (padrão: `../../backups`) |
+| `--out <dir>` | Diretório de saída (padrão: `backups/`) |
 
 Exemplos:
 
 ```bash
 # Baixar apenas arquivos de um projeto específico
-node index.js --project "Design System"
+node src/index.js --project "Design System"
 
 # Baixar com browser visível, limitando a 5 arquivos
-node index.js --headed --limit 5
+node src/index.js --headed --limit 5
 
 # Forçar re-download de tudo
-node index.js --force
+node src/index.js --force
 ```
 
 ---
@@ -176,7 +182,7 @@ Statuses possíveis: `pending`, `downloaded`, `skipped`, `failed`, `restricted`.
 ## Limitações conhecidas
 
 - **Drafts não são incluídos**: a API `/v1/teams/:id/projects` retorna apenas projetos de time, não os Drafts pessoais dos membros.
-- **Arquivos com restrição de cópia**: se um arquivo tiver a opção "Restrict copying and sharing" ativada, a opção "Save local copy" / "Salvar cópia local" não aparece e o arquivo é marcado como `restricted` no manifest. Esse status também pode ser um falso negativo (menu ainda carregando, UI em outro idioma, captcha já ativo). Para revalidar: `node index.js --from-manifest --status restricted`.
+- **Arquivos com restrição de cópia**: se um arquivo tiver a opção "Restrict copying and sharing" ativada, a opção "Save local copy" / "Salvar cópia local" não aparece e o arquivo é marcado como `restricted` no manifest. Esse status também pode ser um falso negativo (menu ainda carregando, UI em outro idioma, captcha já ativo). Para revalidar: `node src/index.js --from-manifest --status restricted`.
 - **Dependência do texto da UI**: o script busca os itens de menu por texto, em inglês e em português (`UI_TEXTS` em `downloader.js`). O idioma vem da configuração da **conta** do Figma, não do browser. Se o Figma alterar os textos da interface ou a conta usar outro idioma, o gatilho quebrará e o arquivo é logado como `failed` — o erro não é silenciado.
 - **Canvas WebGL**: ambientes sem aceleração gráfica podem ter dificuldade em renderizar o canvas headless. Use a flag `--headed` nesses casos.
 - **Limite diário de export da conta**: o Figma impõe um teto diário de "Save local copy" por conta (não é um limite do script). Na prática, o teto observado ficou em torno de **~47 arquivos no mesmo dia**. Depois disso o Figma primeiro pede captcha ("verificar que você não é um robô") e, se o limite já estourou, o botão de download **some** — inclusive no browser logado, mesmo resolvendo o captcha na mão. Não há como desativar nem um cooldown publicado; a expectativa razoável é o ciclo resetar no dia seguinte. Fatie a fila com `--limit` (por exemplo 25–40 por dia) em vez de tentar baixar tudo de uma vez.
@@ -273,7 +279,7 @@ If Figma is installed and configured to open links in the desktop app, the brows
 ### Full run (Step 1 + Step 2)
 
 ```bash
-node index.js
+node src/index.js
 ```
 
 ### Mapping only (without opening the browser)
@@ -281,7 +287,7 @@ node index.js
 Useful for validating the token and seeing how many files will be downloaded before starting:
 
 ```bash
-node index.js --map-only
+node src/index.js --map-only
 ```
 
 ### Resume interrupted downloads
@@ -289,7 +295,7 @@ node index.js --map-only
 The manifest records the status of each file. By default, entries with `pending` status (not yet downloaded) or `failed` status (download failed) are automatically added back to the queue:
 
 ```bash
-npm run download        # = node index.js --from-manifest
+npm run download        # = node src/index.js --from-manifest
 ```
 
 At the beginning of the run, the script prints the count for each manifest status and the queue composition, so you know exactly what will be processed.
@@ -299,8 +305,8 @@ To choose which statuses to enqueue again, use `--status`:
 ```bash
 npm run retry                                  # failed files only
 npm run resume                                 # files that have never been attempted
-node index.js --from-manifest --status restricted        # revalidate restricted files
-node index.js --from-manifest --status failed --limit 5  # test 5 before processing everything
+node src/index.js --from-manifest --status restricted        # revalidate restricted files
+node src/index.js --from-manifest --status failed --limit 5  # test 5 before processing everything
 ```
 
 Unlike `--force`, `--status` does not re-enqueue files that have already been downloaded.
@@ -316,19 +322,19 @@ Unlike `--force`, `--status` does not re-enqueue files that have already been do
 | `--headed` | Show the browser window (useful for debugging) |
 | `--project <name\|id>` | Filter by project (repeatable) |
 | `--limit <n>` | Download at most N files in this run |
-| `--out <dir>` | Output directory (default: `../../backups`) |
+| `--out <dir>` | Output directory (default: `backups/`) |
 
 Examples:
 
 ```bash
 # Download files from only one specific project
-node index.js --project "Design System"
+node src/index.js --project "Design System"
 
 # Download with a visible browser, limiting the run to 5 files
-node index.js --headed --limit 5
+node src/index.js --headed --limit 5
 
 # Force a re-download of everything
-node index.js --force
+node src/index.js --force
 ```
 
 ---
@@ -371,7 +377,7 @@ Possible statuses: `pending`, `downloaded`, `skipped`, `failed`, `restricted`.
 ## Known limitations
 
 - **Drafts are not included**: the `/v1/teams/:id/projects` API returns only team projects, not members' personal Drafts.
-- **Files with copy restrictions**: if a file has **Restrict copying and sharing** enabled, the **Save local copy** option does not appear and the file is marked as `restricted` in the manifest. This status can also be a false negative (the menu is still loading, the UI is in another language, or a captcha is already active). To revalidate: `node index.js --from-manifest --status restricted`.
+- **Files with copy restrictions**: if a file has **Restrict copying and sharing** enabled, the **Save local copy** option does not appear and the file is marked as `restricted` in the manifest. This status can also be a false negative (the menu is still loading, the UI is in another language, or a captcha is already active). To revalidate: `node src/index.js --from-manifest --status restricted`.
 - **UI text dependency**: the script finds menu items by text in English and Portuguese (`UI_TEXTS` in `downloader.js`). The language comes from the Figma **account** settings, not the browser. If Figma changes its interface text or the account uses another language, the trigger will break and the file will be logged as `failed` - the error is not silenced.
 - **WebGL canvas**: environments without hardware acceleration may have trouble rendering the headless canvas. Use the `--headed` flag in those cases.
 - **Account export daily limit**: Figma imposes a daily limit on **Save local copy** per account (this is not a script limit). In practice, the observed limit was around **~47 files on the same day**. After that, Figma first asks for a captcha ("verify that you are not a robot") and, if the limit has already been reached, the download button **disappears** - even in the logged-in browser, including after solving the captcha manually. There is no way to disable this or a published cooldown; the reasonable expectation is that the limit resets the following day. Split the queue with `--limit` (for example, 25-40 per day) instead of trying to download everything at once.

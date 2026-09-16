@@ -4,19 +4,19 @@
  * CLI de backup de arquivos Figma.
  *
  * Uso:
- *   node index.js                          # Etapa 1 + seleção interativa + Etapa 2
- *   node index.js --map-only               # Só mapeamento (sem browser)
- *   node index.js --from-manifest          # Pula mapeamento, usa manifest existente
- *   node index.js --project "Nome" --force # Filtra por projeto, força re-download
- *   node index.js --headed --limit 10      # Browser visível, máx 10 arquivos
- *   node index.js --yes                    # Não interativo: baixa tudo sem perguntar
+ *   node src/index.js                          # Etapa 1 + seleção interativa + Etapa 2
+ *   node src/index.js --map-only               # Só mapeamento (sem browser)
+ *   node src/index.js --from-manifest          # Pula mapeamento, usa manifest existente
+ *   node src/index.js --project "Nome" --force # Filtra por projeto, força re-download
+ *   node src/index.js --headed --limit 10      # Browser visível, máx 10 arquivos
+ *   node src/index.js --yes                    # Não interativo: baixa tudo sem perguntar
  *
  * Seleção da fila por status (padrão: pending,failed — os que faltam + os que falharam):
- *   node index.js --from-manifest                            # pendentes + falhados
- *   node index.js --from-manifest --status failed            # só os que falharam
- *   node index.js --from-manifest --status pending           # só os nunca tentados
- *   node index.js --from-manifest --status restricted        # revalida os restritos
- *   node index.js --from-manifest --status failed --limit 5  # testa 5 antes de soltar tudo
+ *   node src/index.js --from-manifest                            # pendentes + falhados
+ *   node src/index.js --from-manifest --status failed            # só os que falharam
+ *   node src/index.js --from-manifest --status pending           # só os nunca tentados
+ *   node src/index.js --from-manifest --status restricted        # revalida os restritos
+ *   node src/index.js --from-manifest --status failed --limit 5  # testa 5 antes de soltar tudo
  *
  * Veja README.md para configuração de variáveis de ambiente.
  */
