@@ -21,8 +21,8 @@ if (!fs.existsSync(envPath)) {
 const { default: dotenv } = await import('dotenv')
 dotenv.config({ path: envPath })
 
-// Raiz do repo (dois níveis acima de scripts/figmaBackup)
-const REPO_ROOT = path.resolve(__dirname, '..', '..')
+// A raiz do repo é o diretório deste script.
+const REPO_ROOT = __dirname
 
 function require_env(name) {
   const val = process.env[name]
