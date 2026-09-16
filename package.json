@@ -1,0 +1,21 @@
+{
+  "name": "figma-backup",
+  "version": "1.0.0",
+  "description": "Backup completo de arquivos .fig da empresa via Figma REST API + Playwright",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "map": "node index.js --map-only",
+    "download": "node index.js --from-manifest",
+    "retry": "node index.js --from-manifest --status failed",
+    "resume": "node index.js --from-manifest --status pending"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "playwright": "^1.47.0"
+  }
+}
