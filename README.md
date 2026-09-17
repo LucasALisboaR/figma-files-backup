@@ -156,6 +156,7 @@ backups/
   Produto/
     Tela de Login.fig
     Dashboard.fig
+    Dashboard [AbCdEfGh].fig           # mesmo nome: sufixo único pelo fileKey
   Marketing/
     Landing Page.jam                   # FigJam exporta como .jam
 ```
@@ -176,7 +177,11 @@ O `manifest.json` guarda por `fileKey`:
 }
 ```
 
-Statuses possíveis: `pending`, `downloaded`, `skipped`, `failed`, `restricted`.
+Status possíveis: `pending`, `downloaded`, `skipped`, `failed`, `restricted`.
+
+Se dois arquivos na mesma pasta tiverem exatamente o mesmo nome, o primeiro
+mantém o nome original e o seguinte recebe um sufixo único baseado no `fileKey`
+(por exemplo, `Dashboard [AbCdEfGh].fig`), evitando sobrescritas silenciosas.
 
 ---
 ## Limitações conhecidas
@@ -350,6 +355,7 @@ backups/
   Produto/
     Tela de Login.fig
     Dashboard.fig
+    Dashboard [AbCdEfGh].fig           # same name: unique fileKey suffix
   Marketing/
     Landing Page.jam                   # FigJam exports as .jam
 ```
@@ -371,6 +377,10 @@ The `manifest.json` file stores entries by `fileKey`:
 ```
 
 Possible statuses: `pending`, `downloaded`, `skipped`, `failed`, `restricted`.
+
+If two files in the same folder have exactly the same name, the first keeps the
+original name and the next one receives a unique suffix based on its `fileKey`
+(for example, `Dashboard [AbCdEfGh].fig`), preventing silent overwrites.
 
 ---
 

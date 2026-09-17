@@ -56,6 +56,49 @@ export function updateEntry(manifestPath, manifest, fileKey, updates) {
 }
 
 /**
+ * Repara manifests gerados antes da proteção contra nomes duplicados.
+ * Quando duas entradas apontam para o mesmo savedAs, todas voltam para pending,
+ * pois não é possível saber qual conteúdo restou no arquivo sobrescrito. A
+ * primeira conserva o caminho original e as demais recebem nomes únicos.
+ * @returns {number} quantidade de entradas recolocadas na fila
+ */
+export function repairDuplicateSavedPaths(manifestPath, manifest) {
+  const groups = new Map()
+  let repaired = 0
+
+  for (const entry of Object.values(manifest)) {
+    if (!entry.savedAs) continue
+
+    const normalized = path.normalize(entry.savedAs)
+    const key = process.platform === 'win32' ? normalized.toLowerCase() : normalized
+    if (!groups.has(key)) groups.set(key, [])
+    groups.get(key).push(entry)
+  }
+
+  for (const entries of groups.values()) {
+    if (entries.length < 2) continue
+
+    entries.forEach((entry, index) => {
+      entry.status = 'pending'
+      entry.downloadedAt = undefined
+      entry.error = 'Caminho duplicado no manifest; arquivo reenfileirado com nome único.'
+
+      // A primeira entrada conserva a posse do caminho original para
+      // sobrescrevê-lo. As demais receberão o sufixo com fileKey.
+      if (index > 0) entry.savedAs = undefined
+      repaired++
+    })
+  }
+
+  if (repaired > 0) {
+    saveManifest(manifestPath, manifest)
+    logWarn(`${repaired} entrada(s) com caminho de backup duplicado foram reenfileiradas.`)
+  }
+
+  return repaired
+}
+
+/**
  * Popula o manifest com os arquivos descobertos na Etapa 1,
  * preservando entradas já existentes (para não perder status de downloads anteriores).
  * @param {string} manifestPath

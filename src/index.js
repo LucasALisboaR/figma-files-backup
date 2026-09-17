@@ -25,7 +25,13 @@ import fs from 'fs'
 import config from './config.js'
 import { mapAllFiles } from './figmaApi.js'
 import { runDownloads } from './downloader.js'
-import { loadManifest, populateManifest, getPendingEntries, DEFAULT_QUEUE_STATUSES } from './manifest.js'
+import {
+  loadManifest,
+  populateManifest,
+  getPendingEntries,
+  repairDuplicateSavedPaths,
+  DEFAULT_QUEUE_STATUSES,
+} from './manifest.js'
 import { selectProjects } from './prompt.js'
 import { writeRunLog } from './fileLogger.js'
 import { logInfo, logSuccess, logWarn, logError, logSummary, log } from './utils.js'
@@ -49,6 +55,7 @@ async function main() {
   fs.mkdirSync(config.outDir, { recursive: true })
 
   let manifest = loadManifest(config.manifestPath)
+  repairDuplicateSavedPaths(config.manifestPath, manifest)
   logInfo(`Diretório de saída: ${config.outDir}`)
   logInfo(`Manifest:           ${config.manifestPath}`)
   log('')

@@ -3,7 +3,19 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import fs from 'fs'
 import os from 'os'
-import { sanitizeName, randomDelay, logProgress, logSuccess, logSkip, logError, logWarn, logInfo, sleep } from './utils.js'
+import {
+  buildSavedPathOwners,
+  claimBackupDestination,
+  randomDelay,
+  resolveBackupDestination,
+  logProgress,
+  logSuccess,
+  logSkip,
+  logError,
+  logWarn,
+  logInfo,
+  sleep,
+} from './utils.js'
 import { updateEntry } from './manifest.js'
 
 // Erro específico para arquivos que são Team Libraries (não têm canvas de design)
@@ -576,7 +588,7 @@ async function triggerSaveLocalCopy(page) {
  * O download pode ser acionado na página atual OU em uma nova aba aberta pelo Figma —
  * por isso escutamos o evento no contexto inteiro (via newPage) além da página atual.
  */
-async function downloadFile(context, entry, outDir, timeoutMs) {
+async function downloadFile(context, entry, outDir, timeoutMs, pathOwners) {
   const page = await context.newPage()
   clearScreenshots() // limpa pasta e reseta contador para este arquivo
 
@@ -680,14 +692,21 @@ async function downloadFile(context, entry, outDir, timeoutMs) {
     const suggested = download.suggestedFilename()
     const ext = path.extname(suggested) || '.fig'
 
-    // Salva em backups/<Projeto>/<Arquivo>.<ext>
-    const projDir = path.join(outDir, sanitizeName(entry.projectName))
-    fs.mkdirSync(projDir, { recursive: true })
-    const destFileName = `${sanitizeName(entry.fileName)}${ext}`
-    const destPath = path.join(projDir, destFileName)
+    // Salva em backups/<Projeto>/<Arquivo>.<ext>. Se dois arquivos da mesma
+    // pasta tiverem o mesmo nome, o segundo recebe um sufixo com o fileKey.
+    const destPath = resolveBackupDestination({
+      outDir,
+      projectName: entry.projectName,
+      fileName: entry.fileName,
+      extension: ext,
+      fileKey: entry.fileKey,
+      pathOwners,
+    })
+    fs.mkdirSync(path.dirname(destPath), { recursive: true })
 
     logInfo(`  Download iniciado (${suggested}) — transferindo...`)
     await download.saveAs(destPath)
+    claimBackupDestination(pathOwners, destPath, entry.fileKey)
     await shot(page, 'download-complete')
 
     const savedAs = path.relative(outDir, destPath)
@@ -752,6 +771,7 @@ export async function runDownloads(entries, manifestPath, manifest, outDir, opts
   }
 
   const total = Math.min(entries.length, limit)
+  const pathOwners = buildSavedPathOwners(manifest, outDir)
   logInfo(`Iniciando downloads: ${total} arquivo(s) a processar.`)
 
   try {
@@ -763,7 +783,7 @@ export async function runDownloads(entries, manifestPath, manifest, outDir, opts
 
       let result
       try {
-        result = await downloadFile(context, entry, outDir, downloadTimeout)
+        result = await downloadFile(context, entry, outDir, downloadTimeout, pathOwners)
       } catch (err) {
         if (err.name === 'CaptchaError') {
           logError(`  ${err.message}`)

@@ -7,6 +7,7 @@ import {
   getPendingEntries,
   loadManifest,
   populateManifest,
+  repairDuplicateSavedPaths,
   saveManifest,
   updateEntry,
 } from '../manifest.js'
@@ -77,4 +78,31 @@ test('getPendingEntries filters by status and project, then sorts', () => {
   const result = getPendingEntries(manifest, { projects: ['design'] })
 
   assert.deepEqual(result.map(item => item.fileKey), ['pending', 'failed'])
+})
+
+test('repairDuplicateSavedPaths requeues entries overwritten by a name collision', () => {
+  const manifestPath = temporaryManifestPath()
+  const manifest = {
+    first: entry({
+      fileKey: 'first',
+      status: 'downloaded',
+      savedAs: 'Produto/Dashboard.fig',
+      downloadedAt: '2026-09-10T10:00:00Z',
+    }),
+    second: entry({
+      fileKey: 'second',
+      status: 'downloaded',
+      savedAs: 'Produto/Dashboard.fig',
+      downloadedAt: '2026-09-10T10:01:00Z',
+    }),
+  }
+
+  const repaired = repairDuplicateSavedPaths(manifestPath, manifest)
+
+  assert.equal(repaired, 2)
+  assert.equal(manifest.first.status, 'pending')
+  assert.equal(manifest.first.savedAs, 'Produto/Dashboard.fig')
+  assert.equal(manifest.second.status, 'pending')
+  assert.equal(manifest.second.savedAs, undefined)
+  assert.equal(loadManifest(manifestPath).second.status, 'pending')
 })
